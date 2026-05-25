@@ -12,7 +12,10 @@ import kotlinx.coroutines.launch
 
 sealed interface InstitutionListUiState {
     data object Loading : InstitutionListUiState
-    data class Success(val institutions: List<Institution>) : InstitutionListUiState
+    data class Success(
+        val institutions: List<Institution>,
+        val fromCache: Boolean = false,
+    ) : InstitutionListUiState
     data class Error(val message: String) : InstitutionListUiState
 }
 
@@ -29,15 +32,29 @@ class InstitutionListViewModel(
 
     fun loadInstitutions() {
         viewModelScope.launch {
-            _uiState.value = InstitutionListUiState.Loading
+            val cached = repository.getCachedInstitutions()
+            if (cached.isNotEmpty()) {
+                _uiState.value = InstitutionListUiState.Success(
+                    institutions = cached,
+                    fromCache = true,
+                )
+            } else {
+                _uiState.value = InstitutionListUiState.Loading
+            }
+
             repository.getInstitutions()
-                .onSuccess { institutions ->
-                    _uiState.value = InstitutionListUiState.Success(institutions)
+                .onSuccess { data ->
+                    _uiState.value = InstitutionListUiState.Success(
+                        institutions = data.value,
+                        fromCache = data.fromCache,
+                    )
                 }
                 .onFailure { error ->
-                    _uiState.value = InstitutionListUiState.Error(
-                        error.message ?: "Не удалось загрузить список",
-                    )
+                    if (cached.isEmpty()) {
+                        _uiState.value = InstitutionListUiState.Error(
+                            error.message ?: "Не удалось загрузить список",
+                        )
+                    }
                 }
         }
     }

@@ -4,7 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Surface
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -65,10 +67,24 @@ fun InstitutionDetailScreen(
                 onRetry = viewModel::loadInstitution,
                 modifier = Modifier.padding(innerPadding),
             )
-            is InstitutionDetailUiState.Success -> InstitutionDetailContent(
-                institution = state.institution,
-                modifier = Modifier.padding(innerPadding),
-            )
+            is InstitutionDetailUiState.Success -> Column(Modifier.padding(innerPadding)) {
+                if (state.fromCache) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                    ) {
+                        Text(
+                            text = "Офлайн: сохранённые данные",
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        )
+                    }
+                }
+                InstitutionDetailContent(
+                    institution = state.institution,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
         }
     }
 }

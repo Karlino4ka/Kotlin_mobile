@@ -12,7 +12,10 @@ import kotlinx.coroutines.launch
 
 sealed interface InstitutionDetailUiState {
     data object Loading : InstitutionDetailUiState
-    data class Success(val institution: Institution) : InstitutionDetailUiState
+    data class Success(
+        val institution: Institution,
+        val fromCache: Boolean = false,
+    ) : InstitutionDetailUiState
     data class Error(val message: String) : InstitutionDetailUiState
 }
 
@@ -32,8 +35,11 @@ class InstitutionDetailViewModel(
         viewModelScope.launch {
             _uiState.value = InstitutionDetailUiState.Loading
             repository.getInstitution(institutionId)
-                .onSuccess { institution ->
-                    _uiState.value = InstitutionDetailUiState.Success(institution)
+                .onSuccess { data ->
+                    _uiState.value = InstitutionDetailUiState.Success(
+                        institution = data.value,
+                        fromCache = data.fromCache,
+                    )
                 }
                 .onFailure { error ->
                     _uiState.value = InstitutionDetailUiState.Error(

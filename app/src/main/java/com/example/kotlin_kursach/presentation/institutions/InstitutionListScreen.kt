@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Surface
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -46,19 +47,40 @@ fun InstitutionListScreen(
             TopAppBar(title = { Text("Каталог учебных заведений") })
         },
     ) { innerPadding ->
-        when (val state = uiState) {
-            InstitutionListUiState.Loading -> LoadingContent(Modifier.padding(innerPadding))
-            is InstitutionListUiState.Error -> ErrorContent(
-                message = state.message,
-                onRetry = viewModel::loadInstitutions,
-                modifier = Modifier.padding(innerPadding),
-            )
-            is InstitutionListUiState.Success -> InstitutionListContent(
-                institutions = state.institutions,
-                onInstitutionClick = onInstitutionClick,
-                modifier = Modifier.padding(innerPadding),
-            )
+        Column(modifier = Modifier.padding(innerPadding)) {
+            when (val state = uiState) {
+                InstitutionListUiState.Loading -> LoadingContent(Modifier.fillMaxSize())
+                is InstitutionListUiState.Error -> ErrorContent(
+                    message = state.message,
+                    onRetry = viewModel::loadInstitutions,
+                    modifier = Modifier.fillMaxSize(),
+                )
+                is InstitutionListUiState.Success -> {
+                    if (state.fromCache) {
+                        CacheBanner()
+                    }
+                    InstitutionListContent(
+                        institutions = state.institutions,
+                        onInstitutionClick = onInstitutionClick,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            }
         }
+    }
+}
+
+@Composable
+private fun CacheBanner(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.secondaryContainer,
+    ) {
+        Text(
+            text = "Офлайн: показаны сохранённые данные",
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        )
     }
 }
 
