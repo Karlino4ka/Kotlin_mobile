@@ -1,11 +1,7 @@
 package com.example.kotlin_kursach
 
 import android.app.Application
-import com.example.kotlin_kursach.data.AppContainer
+import dagger.hilt.android.HiltAndroidApp
 
-class KotlinKursachApplication : Application() {
-    override fun onCreate() {
-        super.onCreate()
-        AppContainer.init(this)
-    }
-}
+@HiltAndroidApp
+class KotlinKursachApplication : Application()

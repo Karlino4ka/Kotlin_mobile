@@ -5,11 +5,15 @@ import com.example.kotlin_kursach.data.local.toEntity
 import com.example.kotlin_kursach.data.local.toDomain
 import com.example.kotlin_kursach.data.remote.InstitutionApi
 import com.example.kotlin_kursach.data.remote.toDomain
+import com.example.kotlin_kursach.data.remote.toDto
 import com.example.kotlin_kursach.domain.model.CachedData
+import com.example.kotlin_kursach.domain.model.CreateInstitutionInput
 import com.example.kotlin_kursach.domain.model.Institution
 import com.example.kotlin_kursach.domain.repository.InstitutionRepository
+import retrofit2.HttpException
+import javax.inject.Inject
 
-class InstitutionRepositoryImpl(
+class InstitutionRepositoryImpl @Inject constructor(
     private val api: InstitutionApi,
     private val institutionDao: InstitutionDao,
 ) : InstitutionRepository {
@@ -46,5 +50,24 @@ class InstitutionRepositoryImpl(
                 Result.failure(networkError)
             }
         }
+    }
+
+    override suspend fun createInstitution(input: CreateInstitutionInput): Result<Institution> =
+        try {
+            val created = api.createInstitution(input.toDto()).toDomain()
+            institutionDao.upsert(created.toEntity())
+            Result.success(created)
+        } catch (e: HttpException) {
+            val body = e.response()?.errorBody()?.string().orEmpty()
+            val message = parseServerErrorMessage(body) ?: "Ошибка сервера ${e.code()}"
+            Result.failure(IllegalStateException(message, e))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+
+    private fun parseServerErrorMessage(body: String): String? {
+        if (body.isBlank()) return null
+        val match = Regex(""""message"\s*:\s*"([^"]+)"""").find(body) ?: return body
+        return match.groupValues[1]
     }
 }

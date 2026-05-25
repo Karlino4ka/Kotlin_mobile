@@ -3,7 +3,9 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.google.services)
 }
 
 val localProperties = Properties().apply {
@@ -13,6 +15,7 @@ val localProperties = Properties().apply {
     }
 }
 val apiBaseUrl: String = localProperties.getProperty("api.base.url", "http://10.0.2.2:8080/")
+val adminEmails: String = localProperties.getProperty("admin.emails", "")
 
 android {
     namespace = "com.example.kotlin_kursach"
@@ -31,6 +34,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
+        buildConfigField("String", "ADMIN_EMAILS", "\"$adminEmails\"")
     }
 
     buildTypes {
@@ -71,6 +75,12 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+    ksp(libs.hilt.compiler)
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.kotlinx.coroutines.play.services)
     testImplementation(libs.androidx.room.testing)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
