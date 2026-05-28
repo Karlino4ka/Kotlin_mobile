@@ -8,7 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.kotlin_kursach.core.AdminConfig
-import com.example.kotlin_kursach.presentation.admin.AddInstitutionScreen
+import com.example.kotlin_kursach.presentation.admin.InstitutionFormScreen
 import com.example.kotlin_kursach.presentation.institutions.InstitutionDetailScreen
 import com.example.kotlin_kursach.presentation.institutions.InstitutionListViewModel
 import com.example.kotlin_kursach.presentation.main.MainScreen
@@ -19,8 +19,10 @@ object Routes {
     const val MAIN = "main"
     const val INSTITUTION_DETAIL = "institution/{id}"
     const val ADD_INSTITUTION = "add_institution"
+    const val EDIT_INSTITUTION = "edit_institution/{id}"
 
     fun institutionDetail(id: String) = "institution/$id"
+    fun editInstitution(id: String) = "edit_institution/$id"
 }
 
 @Composable
@@ -29,6 +31,7 @@ fun AppNavigation(
     onSignOut: () -> Unit,
 ) {
     val navController = rememberNavController()
+    val isAdmin = AdminConfig.isAdmin(userEmail)
 
     NavHost(
         navController = navController,
@@ -50,9 +53,24 @@ fun AppNavigation(
             val listViewModel: InstitutionListViewModel = hiltViewModel(
                 navController.getBackStackEntry(Routes.MAIN),
             )
-            AddInstitutionScreen(
+            InstitutionFormScreen(
                 onBack = { navController.popBackStack() },
-                onCreated = {
+                onSaved = {
+                    listViewModel.loadInstitutions()
+                    navController.popBackStack()
+                },
+            )
+        }
+        composable(
+            route = Routes.EDIT_INSTITUTION,
+            arguments = listOf(navArgument(INSTITUTION_ID_ARG) { type = NavType.StringType }),
+        ) {
+            val listViewModel: InstitutionListViewModel = hiltViewModel(
+                navController.getBackStackEntry(Routes.MAIN),
+            )
+            InstitutionFormScreen(
+                onBack = { navController.popBackStack() },
+                onSaved = {
                     listViewModel.loadInstitutions()
                     navController.popBackStack()
                 },
@@ -62,9 +80,19 @@ fun AppNavigation(
             route = Routes.INSTITUTION_DETAIL,
             arguments = listOf(navArgument(INSTITUTION_ID_ARG) { type = NavType.StringType }),
         ) {
+            val listViewModel: InstitutionListViewModel = hiltViewModel(
+                navController.getBackStackEntry(Routes.MAIN),
+            )
             InstitutionDetailScreen(
                 onBack = { navController.popBackStack() },
-                isAdmin = AdminConfig.isAdmin(userEmail),
+                isAdmin = isAdmin,
+                onEdit = { id ->
+                    navController.navigate(Routes.editInstitution(id))
+                },
+                onDeleted = {
+                    listViewModel.loadInstitutions()
+                    navController.popBackStack()
+                },
             )
         }
     }

@@ -16,6 +16,9 @@ fun InstitutionDto.toDomain(): Institution = Institution(
     description = description,
     phone = phone,
     website = website,
+    averageRating = averageRating,
+    reviewCount = reviewCount,
+    photos = photos.orEmpty().map { it.toDomain() },
 )
 
 fun CreateInstitutionInput.toDto(): CreateInstitutionRequestDto = CreateInstitutionRequestDto(

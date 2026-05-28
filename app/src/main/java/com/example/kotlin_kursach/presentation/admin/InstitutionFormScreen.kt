@@ -2,6 +2,7 @@ package com.example.kotlin_kursach.presentation.admin
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +26,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -34,23 +36,25 @@ import com.example.kotlin_kursach.domain.model.toDisplayName
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddInstitutionScreen(
+fun InstitutionFormScreen(
     onBack: () -> Unit,
-    onCreated: () -> Unit,
-    viewModel: AddInstitutionViewModel = hiltViewModel(),
+    onSaved: () -> Unit,
+    viewModel: InstitutionFormViewModel = hiltViewModel(),
 ) {
     val form by viewModel.formState.collectAsStateWithLifecycle()
 
     LaunchedEffect(form.isSuccess) {
         if (form.isSuccess) {
-            onCreated()
+            onSaved()
         }
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Добавить заведение") },
+                title = {
+                    Text(if (viewModel.isEditMode) "Редактировать" else "Добавить заведение")
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
@@ -59,6 +63,18 @@ fun AddInstitutionScreen(
             )
         },
     ) { padding ->
+        if (form.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+            return@Scaffold
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -68,7 +84,11 @@ fun AddInstitutionScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = "Новая запись появится в каталоге для всех пользователей",
+                text = if (viewModel.isEditMode) {
+                    "Изменения будут видны всем пользователям каталога"
+                } else {
+                    "Новая запись появится в каталоге для всех пользователей"
+                },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -126,6 +146,15 @@ fun AddInstitutionScreen(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
             )
+            InstitutionPhotosSection(
+                photos = form.displayPhotos,
+                photoUrlInput = form.photoUrlInput,
+                isPhotoProcessing = form.isPhotoProcessing,
+                onPhotoUrlInputChange = viewModel::updatePhotoUrlInput,
+                onAddPhotoUrl = viewModel::addPhotoByUrl,
+                onPickPhoto = viewModel::onPhotoPicked,
+                onRemovePhoto = viewModel::removePhoto,
+            )
             form.errorMessage?.let { error ->
                 Text(error, color = MaterialTheme.colorScheme.error)
             }
@@ -137,7 +166,7 @@ fun AddInstitutionScreen(
                 if (form.isSubmitting) {
                     CircularProgressIndicator()
                 } else {
-                    Text("Сохранить")
+                    Text(if (viewModel.isEditMode) "Сохранить изменения" else "Сохранить")
                 }
             }
         }

@@ -9,7 +9,7 @@ import com.example.kotlin_kursach.data.local.entity.InstitutionEntity
 
 @Database(
     entities = [InstitutionEntity::class, FavoriteEntity::class],
-    version = 3,
+    version = 5,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {

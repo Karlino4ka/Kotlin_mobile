@@ -3,6 +3,8 @@ package com.example.kotlin_kursach.di
 import com.example.kotlin_kursach.BuildConfig
 import com.example.kotlin_kursach.data.remote.AdminAuthInterceptor
 import com.example.kotlin_kursach.data.remote.InstitutionApi
+import com.example.kotlin_kursach.data.remote.InstitutionPhotoApi
+import com.example.kotlin_kursach.data.remote.ReviewApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -43,5 +45,17 @@ object NetworkModule {
     @Singleton
     fun provideInstitutionApi(retrofit: Retrofit): InstitutionApi {
         return retrofit.create(InstitutionApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideReviewApi(retrofit: Retrofit): ReviewApi {
+        return retrofit.create(ReviewApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideInstitutionPhotoApi(retrofit: Retrofit): InstitutionPhotoApi {
+        return retrofit.create(InstitutionPhotoApi::class.java)
     }
 }

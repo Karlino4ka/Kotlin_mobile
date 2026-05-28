@@ -13,12 +13,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -34,6 +38,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -43,6 +50,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.kotlin_kursach.domain.model.Institution
 import com.example.kotlin_kursach.domain.model.toDisplayName
+import com.example.kotlin_kursach.presentation.components.InstitutionPhotosCarousel
+import com.example.kotlin_kursach.presentation.components.InstitutionRatingBadge
 import com.example.kotlin_kursach.presentation.components.InstitutionTypeBadge
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,12 +59,18 @@ import com.example.kotlin_kursach.presentation.components.InstitutionTypeBadge
 fun InstitutionDetailScreen(
     onBack: () -> Unit,
     isAdmin: Boolean = false,
+    onEdit: (String) -> Unit = {},
+    onDeleted: () -> Unit = {},
     viewModel: InstitutionDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isFavorite by viewModel.isFavoriteState.collectAsStateWithLifecycle()
+    val reviewsState by viewModel.reviewsState.collectAsStateWithLifecycle()
     val showFavorite = !isAdmin
     val context = LocalContext.current
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var isDeleting by remember { mutableStateOf(false) }
+    var deleteError by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = {
@@ -126,6 +141,12 @@ fun InstitutionDetailScreen(
                 }
                 InstitutionDetailContent(
                     institution = state.institution,
+                    reviewsState = reviewsState,
+                    isAdmin = isAdmin,
+                    isDeleting = isDeleting,
+                    onRatingChange = viewModel::updateReviewRating,
+                    onReviewTextChange = viewModel::updateReviewText,
+                    onSubmitReview = viewModel::submitReview,
                     onCall = { phone ->
                         context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone")))
                     },
@@ -133,17 +154,81 @@ fun InstitutionDetailScreen(
                         val normalized = if (url.startsWith("http")) url else "https://$url"
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(normalized)))
                     },
+                    onEdit = { onEdit(state.institution.id) },
+                    onDeleteClick = { showDeleteDialog = true },
                 )
             }
         }
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                if (!isDeleting) showDeleteDialog = false
+            },
+            title = { Text("Удалить заведение?") },
+            text = { Text("Запись будет удалена из каталога для всех пользователей.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        isDeleting = true
+                        deleteError = null
+                        viewModel.deleteInstitution { result ->
+                            isDeleting = false
+                            result.onSuccess {
+                                showDeleteDialog = false
+                                onDeleted()
+                            }.onFailure { error ->
+                                deleteError = error.message ?: "Не удалось удалить"
+                            }
+                        }
+                    },
+                    enabled = !isDeleting,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                    ),
+                ) {
+                    Text(if (isDeleting) "Удаление…" else "Удалить")
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = { showDeleteDialog = false },
+                    enabled = !isDeleting,
+                ) {
+                    Text("Отмена")
+                }
+            },
+        )
+    }
+
+    deleteError?.let { message ->
+        AlertDialog(
+            onDismissRequest = { deleteError = null },
+            title = { Text("Ошибка") },
+            text = { Text(message) },
+            confirmButton = {
+                Button(onClick = { deleteError = null }) {
+                    Text("OK")
+                }
+            },
+        )
     }
 }
 
 @Composable
 private fun InstitutionDetailContent(
     institution: Institution,
+    reviewsState: ReviewsUiState,
+    isAdmin: Boolean,
+    isDeleting: Boolean,
+    onRatingChange: (Int) -> Unit,
+    onReviewTextChange: (String) -> Unit,
+    onSubmitReview: () -> Unit,
     onCall: (String) -> Unit,
     onOpenWebsite: (String) -> Unit,
+    onEdit: () -> Unit,
+    onDeleteClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -152,12 +237,20 @@ private fun InstitutionDetailContent(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        InstitutionPhotosCarousel(
+            photos = institution.photos,
+            modifier = Modifier.fillMaxWidth(),
+        )
         Text(
             text = institution.name,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
         )
         InstitutionTypeBadge(type = institution.type)
+        InstitutionRatingBadge(
+            averageRating = institution.averageRating,
+            reviewCount = institution.reviewCount,
+        )
         InfoCard(title = "Город", value = institution.city)
         InfoCard(title = "Адрес", value = institution.address)
         InfoCard(title = "Описание", value = institution.description)
@@ -186,6 +279,40 @@ private fun InstitutionDetailContent(
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        ReviewsSection(
+            averageRating = institution.averageRating,
+            reviewCount = institution.reviewCount,
+            reviewsState = reviewsState,
+            onRatingChange = onRatingChange,
+            onTextChange = onReviewTextChange,
+            onSubmit = onSubmitReview,
+        )
+        if (isAdmin) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                FilledTonalButton(
+                    onClick = onEdit,
+                    enabled = !isDeleting,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Icon(Icons.Default.Edit, contentDescription = null)
+                    Text("Изменить", modifier = Modifier.padding(start = 6.dp))
+                }
+                OutlinedButton(
+                    onClick = onDeleteClick,
+                    enabled = !isDeleting,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error,
+                    ),
+                ) {
+                    Icon(Icons.Default.Delete, contentDescription = null)
+                    Text("Удалить", modifier = Modifier.padding(start = 6.dp))
+                }
+            }
+        }
     }
 }
 

@@ -3,9 +3,11 @@ package com.example.kotlin_kursach.di
 import com.example.kotlin_kursach.data.auth.FirebaseAuthRepository
 import com.example.kotlin_kursach.data.repository.FavoriteRepositoryImpl
 import com.example.kotlin_kursach.data.repository.InstitutionRepositoryImpl
+import com.example.kotlin_kursach.data.repository.ReviewRepositoryImpl
 import com.example.kotlin_kursach.domain.repository.AuthRepository
 import com.example.kotlin_kursach.domain.repository.FavoriteRepository
 import com.example.kotlin_kursach.domain.repository.InstitutionRepository
+import com.example.kotlin_kursach.domain.repository.ReviewRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -33,4 +35,10 @@ abstract class RepositoryModule {
     abstract fun bindFavoriteRepository(
         impl: FavoriteRepositoryImpl,
     ): FavoriteRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindReviewRepository(
+        impl: ReviewRepositoryImpl,
+    ): ReviewRepository
 }

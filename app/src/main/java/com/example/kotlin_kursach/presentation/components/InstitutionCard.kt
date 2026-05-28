@@ -1,6 +1,7 @@
 package com.example.kotlin_kursach.presentation.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -46,13 +47,22 @@ fun InstitutionCard(
             verticalAlignment = Alignment.Top,
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = institution.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.Top,
+                ) {
+                    if (institution.photos.isNotEmpty()) {
+                        InstitutionPhotoThumbnail(photoUrl = institution.photos.first().url)
+                    }
+                    Text(
+                        text = institution.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
                 Row(
                     modifier = Modifier.padding(top = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -69,10 +79,17 @@ fun InstitutionCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                InstitutionTypeBadge(
-                    type = institution.type,
+                Row(
                     modifier = Modifier.padding(top = 8.dp),
-                )
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    InstitutionTypeBadge(type = institution.type)
+                    InstitutionRatingBadge(
+                        averageRating = institution.averageRating,
+                        reviewCount = institution.reviewCount,
+                    )
+                }
             }
             if (showFavorite) {
                 IconButton(onClick = onFavoriteClick) {

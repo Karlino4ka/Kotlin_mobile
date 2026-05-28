@@ -23,4 +23,7 @@ interface InstitutionDao {
 
     @Query("DELETE FROM institutions")
     suspend fun clearAll()
+
+    @Query("DELETE FROM institutions WHERE id = :id")
+    suspend fun deleteById(id: String)
 }

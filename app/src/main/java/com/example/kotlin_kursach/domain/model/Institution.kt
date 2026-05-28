@@ -9,4 +9,7 @@ data class Institution(
     val description: String,
     val phone: String?,
     val website: String?,
+    val averageRating: Double? = null,
+    val reviewCount: Int = 0,
+    val photos: List<InstitutionPhoto> = emptyList(),
 )

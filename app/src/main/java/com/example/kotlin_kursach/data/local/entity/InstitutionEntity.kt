@@ -13,4 +13,7 @@ data class InstitutionEntity(
     val description: String,
     val phone: String?,
     val website: String?,
+    val averageRating: Double?,
+    val reviewCount: Int,
+    val photosJson: String,
 )

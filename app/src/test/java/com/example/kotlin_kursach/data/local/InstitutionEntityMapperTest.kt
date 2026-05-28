@@ -18,6 +18,14 @@ class InstitutionEntityMapperTest {
             description = "Desc",
             phone = null,
             website = "https://test.com",
+            averageRating = 4.2,
+            reviewCount = 2,
+            photos = listOf(
+                com.example.kotlin_kursach.domain.model.InstitutionPhoto(
+                    id = "p1",
+                    url = "http://example.com/1.jpg",
+                ),
+            ),
         )
 
         val entity = institution.toEntity()

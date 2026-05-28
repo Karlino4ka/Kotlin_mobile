@@ -9,6 +9,9 @@ data class InstitutionDto(
     val description: String,
     val phone: String? = null,
     val website: String? = null,
+    val averageRating: Double? = null,
+    val reviewCount: Int = 0,
+    val photos: List<InstitutionPhotoDto>? = null,
 )
 
 enum class InstitutionTypeDto {
