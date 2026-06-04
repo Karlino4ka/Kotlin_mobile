@@ -1,6 +1,7 @@
 package com.example.kotlin_kursach.data.local
 
 import com.example.kotlin_kursach.domain.model.Institution
+import com.example.kotlin_kursach.domain.model.InstitutionOrientation
 import com.example.kotlin_kursach.domain.model.InstitutionType
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -13,6 +14,7 @@ class InstitutionEntityMapperTest {
             id = "1",
             name = "Test",
             type = InstitutionType.COLLEGE,
+            orientations = listOf(InstitutionOrientation.TECHNICAL, InstitutionOrientation.HUMANITARIAN),
             city = "Kazan",
             address = "Addr",
             description = "Desc",

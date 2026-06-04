@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kotlin_kursach.domain.model.CreateInstitutionInput
+import com.example.kotlin_kursach.domain.model.InstitutionOrientation
 import com.example.kotlin_kursach.domain.model.InstitutionPhoto
 import com.example.kotlin_kursach.domain.model.InstitutionType
 import com.example.kotlin_kursach.domain.repository.InstitutionRepository
@@ -24,6 +25,7 @@ data class InstitutionFormState(
     val isLoading: Boolean = false,
     val name: String = "",
     val type: InstitutionType = InstitutionType.SCHOOL,
+    val orientations: Set<InstitutionOrientation> = emptySet(),
     val city: String = "",
     val address: String = "",
     val description: String = "",
@@ -44,7 +46,8 @@ data class InstitutionFormState(
 
     val canSubmit: Boolean
         get() = name.isNotBlank() && city.isNotBlank() && address.isNotBlank() &&
-            description.isNotBlank() && !isSubmitting && !isLoading && !isPhotoProcessing
+            description.isNotBlank() && orientations.isNotEmpty() &&
+            !isSubmitting && !isLoading && !isPhotoProcessing
 }
 
 @HiltViewModel
@@ -75,6 +78,7 @@ class InstitutionFormViewModel @Inject constructor(
                             isLoading = false,
                             name = institution.name,
                             type = institution.type,
+                            orientations = institution.orientations.toSet(),
                             city = institution.city,
                             address = institution.address,
                             description = institution.description,
@@ -102,6 +106,17 @@ class InstitutionFormViewModel @Inject constructor(
     fun updatePhone(value: String) = _formState.update { it.copy(phone = value) }
     fun updateWebsite(value: String) = _formState.update { it.copy(website = value) }
     fun updateType(value: InstitutionType) = _formState.update { it.copy(type = value) }
+    fun toggleOrientation(orientation: InstitutionOrientation) {
+        _formState.update { state ->
+            val updated = state.orientations.toMutableSet()
+            if (orientation in updated) {
+                updated.remove(orientation)
+            } else {
+                updated.add(orientation)
+            }
+            state.copy(orientations = updated, errorMessage = null)
+        }
+    }
     fun updatePhotoUrlInput(value: String) = _formState.update { it.copy(photoUrlInput = value) }
 
     fun addPhotoByUrl() {
@@ -211,6 +226,7 @@ class InstitutionFormViewModel @Inject constructor(
         val input = CreateInstitutionInput(
             name = state.name.trim(),
             type = state.type,
+            orientations = state.orientations.sortedBy { it.ordinal },
             city = state.city.trim(),
             address = state.address.trim(),
             description = state.description.trim(),

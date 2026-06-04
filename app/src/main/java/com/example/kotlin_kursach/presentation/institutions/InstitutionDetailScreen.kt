@@ -52,6 +52,7 @@ import com.example.kotlin_kursach.domain.model.Institution
 import com.example.kotlin_kursach.domain.model.toDisplayName
 import com.example.kotlin_kursach.presentation.components.InstitutionPhotosCarousel
 import com.example.kotlin_kursach.presentation.components.InstitutionRatingBadge
+import com.example.kotlin_kursach.presentation.components.InstitutionOrientationBadges
 import com.example.kotlin_kursach.presentation.components.InstitutionTypeBadge
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -247,6 +248,7 @@ private fun InstitutionDetailContent(
             fontWeight = FontWeight.Bold,
         )
         InstitutionTypeBadge(type = institution.type)
+        InstitutionOrientationBadges(orientations = institution.orientations)
         InstitutionRatingBadge(
             averageRating = institution.averageRating,
             reviewCount = institution.reviewCount,

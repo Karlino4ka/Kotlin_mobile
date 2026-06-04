@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kotlin_kursach.domain.model.Institution
 import com.example.kotlin_kursach.domain.model.InstitutionFilters
+import com.example.kotlin_kursach.domain.model.InstitutionOrientation
 import com.example.kotlin_kursach.domain.model.InstitutionSortOrder
 import com.example.kotlin_kursach.domain.model.InstitutionType
 import com.example.kotlin_kursach.domain.model.applyFilters
@@ -125,6 +126,12 @@ class InstitutionListViewModel @Inject constructor(
     fun onCityFilterChange(city: String?) {
         _screenState.update {
             it.copy(filters = it.filters.copy(city = city))
+        }
+    }
+
+    fun onOrientationFilterChange(orientation: InstitutionOrientation?) {
+        _screenState.update {
+            it.copy(filters = it.filters.copy(orientation = orientation))
         }
     }
 

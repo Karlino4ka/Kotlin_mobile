@@ -11,6 +11,7 @@ class InstitutionFiltersTest {
             id = "1",
             name = "МГУ",
             type = InstitutionType.UNIVERSITY,
+            orientations = listOf(InstitutionOrientation.HUMANITARIAN, InstitutionOrientation.TECHNICAL),
             city = "Москва",
             address = "Ленинские горы",
             description = "Классический университет",
@@ -21,6 +22,7 @@ class InstitutionFiltersTest {
             id = "2",
             name = "Казанский колледж IT",
             type = InstitutionType.COLLEGE,
+            orientations = listOf(InstitutionOrientation.TECHNICAL),
             city = "Казань",
             address = "Баумана",
             description = "IT колледж",
@@ -31,6 +33,7 @@ class InstitutionFiltersTest {
             id = "3",
             name = "Школа №1",
             type = InstitutionType.SCHOOL,
+            orientations = listOf(InstitutionOrientation.MEDICAL),
             city = "Минск",
             address = "Центр",
             description = "Средняя школа",
@@ -66,6 +69,15 @@ class InstitutionFiltersTest {
             listOf("Казанский колледж IT", "МГУ", "Школа №1"),
             result.map { it.name },
         )
+    }
+
+    @Test
+    fun applyFilters_filterByOrientation() {
+        val result = sample.applyFilters(
+            InstitutionFilters(orientation = InstitutionOrientation.TECHNICAL),
+        )
+        assertEquals(2, result.size)
+        assertTrue(result.all { InstitutionOrientation.TECHNICAL in it.orientations })
     }
 
     @Test

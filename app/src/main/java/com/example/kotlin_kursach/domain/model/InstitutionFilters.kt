@@ -9,6 +9,7 @@ enum class InstitutionSortOrder {
 data class InstitutionFilters(
     val searchQuery: String = "",
     val type: InstitutionType? = null,
+    val orientation: InstitutionOrientation? = null,
     val city: String? = null,
     val sortOrder: InstitutionSortOrder = InstitutionSortOrder.NAME_ASC,
 )
@@ -25,6 +26,9 @@ fun List<Institution>.applyFilters(filters: InstitutionFilters): List<Institutio
         }
         .filter { institution ->
             filters.type == null || institution.type == filters.type
+        }
+        .filter { institution ->
+            filters.orientation == null || filters.orientation in institution.orientations
         }
         .filter { institution ->
             filters.city == null || institution.city == filters.city

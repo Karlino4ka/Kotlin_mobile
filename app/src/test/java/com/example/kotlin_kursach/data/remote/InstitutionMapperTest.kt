@@ -1,7 +1,9 @@
 package com.example.kotlin_kursach.data.remote
 
 import com.example.kotlin_kursach.data.remote.dto.InstitutionDto
+import com.example.kotlin_kursach.data.remote.dto.InstitutionOrientationDto
 import com.example.kotlin_kursach.data.remote.dto.InstitutionTypeDto
+import com.example.kotlin_kursach.domain.model.InstitutionOrientation
 import com.example.kotlin_kursach.domain.model.InstitutionType
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -14,6 +16,7 @@ class InstitutionMapperTest {
             id = "1",
             name = "Test University",
             type = InstitutionTypeDto.UNIVERSITY,
+            orientations = listOf(InstitutionOrientationDto.TECHNICAL, InstitutionOrientationDto.MEDICAL),
             city = "Moscow",
             address = "Street 1",
             description = "Description",
@@ -26,6 +29,10 @@ class InstitutionMapperTest {
         assertEquals("1", domain.id)
         assertEquals("Test University", domain.name)
         assertEquals(InstitutionType.UNIVERSITY, domain.type)
+        assertEquals(
+            listOf(InstitutionOrientation.TECHNICAL, InstitutionOrientation.MEDICAL),
+            domain.orientations,
+        )
         assertEquals("Moscow", domain.city)
         assertEquals("+7 000", domain.phone)
     }

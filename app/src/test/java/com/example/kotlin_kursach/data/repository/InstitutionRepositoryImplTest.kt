@@ -7,6 +7,7 @@ import com.example.kotlin_kursach.data.remote.InstitutionApi
 import com.example.kotlin_kursach.data.remote.InstitutionPhotoApi
 import com.example.kotlin_kursach.domain.model.CreateInstitutionInput
 import com.example.kotlin_kursach.domain.model.Institution
+import com.example.kotlin_kursach.domain.model.InstitutionOrientation
 import com.example.kotlin_kursach.domain.model.InstitutionType
 import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockResponse
@@ -60,6 +61,7 @@ class InstitutionRepositoryImplTest {
                       "id":"1",
                       "name":"Test Uni",
                       "type":"UNIVERSITY",
+                      "orientations":["TECHNICAL"],
                       "city":"Москва",
                       "address":"Addr",
                       "description":"Desc",
@@ -86,6 +88,7 @@ class InstitutionRepositoryImplTest {
                 id = "cached",
                 name = "Cached",
                 type = InstitutionType.SCHOOL,
+                orientations = listOf(InstitutionOrientation.HUMANITARIAN),
                 city = "Минск",
                 address = "A",
                 description = "D",
@@ -114,6 +117,7 @@ class InstitutionRepositoryImplTest {
                       "id":"new-1",
                       "name":"Новая школа",
                       "type":"SCHOOL",
+                      "orientations":["MEDICAL"],
                       "city":"Минск",
                       "address":"ул. 1",
                       "description":"Описание"
@@ -126,6 +130,7 @@ class InstitutionRepositoryImplTest {
             CreateInstitutionInput(
                 name = "Новая школа",
                 type = InstitutionType.SCHOOL,
+                orientations = listOf(InstitutionOrientation.MEDICAL),
                 city = "Минск",
                 address = "ул. 1",
                 description = "Описание",

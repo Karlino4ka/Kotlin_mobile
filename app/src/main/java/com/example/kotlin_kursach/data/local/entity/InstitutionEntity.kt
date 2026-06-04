@@ -8,6 +8,7 @@ data class InstitutionEntity(
     @PrimaryKey val id: String,
     val name: String,
     val type: String,
+    val orientationsJson: String,
     val city: String,
     val address: String,
     val description: String,

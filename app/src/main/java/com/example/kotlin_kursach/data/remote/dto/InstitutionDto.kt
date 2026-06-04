@@ -4,6 +4,7 @@ data class InstitutionDto(
     val id: String,
     val name: String,
     val type: InstitutionTypeDto,
+    val orientations: List<InstitutionOrientationDto>? = null,
     val city: String,
     val address: String,
     val description: String,
@@ -18,4 +19,10 @@ enum class InstitutionTypeDto {
     SCHOOL,
     COLLEGE,
     UNIVERSITY,
+}
+
+enum class InstitutionOrientationDto {
+    TECHNICAL,
+    HUMANITARIAN,
+    MEDICAL,
 }

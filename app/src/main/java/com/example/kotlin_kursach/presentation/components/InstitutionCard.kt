@@ -90,6 +90,12 @@ fun InstitutionCard(
                         reviewCount = institution.reviewCount,
                     )
                 }
+                if (institution.orientations.isNotEmpty()) {
+                    InstitutionOrientationBadges(
+                        orientations = institution.orientations,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                }
             }
             if (showFavorite) {
                 IconButton(onClick = onFavoriteClick) {

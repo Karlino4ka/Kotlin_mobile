@@ -40,8 +40,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.kotlin_kursach.domain.model.InstitutionOrientation
 import com.example.kotlin_kursach.domain.model.InstitutionSortOrder
 import com.example.kotlin_kursach.domain.model.InstitutionType
+import com.example.kotlin_kursach.domain.model.toDisplayName
 import com.example.kotlin_kursach.domain.model.toDisplayName
 import com.example.kotlin_kursach.presentation.components.InstitutionCard
 import com.example.kotlin_kursach.presentation.institutions.InstitutionListViewModel
@@ -75,11 +77,13 @@ fun CatalogScreen(
         SearchAndFilters(
             searchQuery = state.filters.searchQuery,
             selectedType = state.filters.type,
+            selectedOrientation = state.filters.orientation,
             selectedCity = state.filters.city,
             cities = state.availableCities,
             statsText = state.statsText,
             onSearchChange = viewModel::onSearchQueryChange,
             onTypeChange = viewModel::onTypeFilterChange,
+            onOrientationChange = viewModel::onOrientationFilterChange,
             onCityChange = viewModel::onCityFilterChange,
             onClearFilters = viewModel::clearFilters,
             onSortClick = { sortMenuExpanded = true },
@@ -136,11 +140,13 @@ fun CatalogScreen(
 private fun SearchAndFilters(
     searchQuery: String,
     selectedType: InstitutionType?,
+    selectedOrientation: InstitutionOrientation?,
     selectedCity: String?,
     cities: List<String>,
     statsText: String,
     onSearchChange: (String) -> Unit,
     onTypeChange: (InstitutionType?) -> Unit,
+    onOrientationChange: (InstitutionOrientation?) -> Unit,
     onCityChange: (String?) -> Unit,
     onClearFilters: () -> Unit,
     onSortClick: () -> Unit,
@@ -155,7 +161,7 @@ private fun SearchAndFilters(
             IconButton(onClick = onSortClick) {
                 Icon(Icons.Default.Sort, contentDescription = "Сортировка")
             }
-            if (searchQuery.isNotEmpty() || selectedType != null || selectedCity != null) {
+            if (searchQuery.isNotEmpty() || selectedType != null || selectedOrientation != null || selectedCity != null) {
                 IconButton(onClick = onClearFilters) {
                     Icon(Icons.Default.Clear, contentDescription = "Сбросить фильтры")
                 }
@@ -187,6 +193,27 @@ private fun SearchAndFilters(
                     selected = selectedType == type,
                     onClick = { onTypeChange(if (selectedType == type) null else type) },
                     label = { Text(type.toDisplayName()) },
+                )
+            }
+        }
+        Row(
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            FilterChip(
+                selected = selectedOrientation == null,
+                onClick = { onOrientationChange(null) },
+                label = { Text("Все направленности") },
+            )
+            InstitutionOrientation.entries.forEach { orientation ->
+                FilterChip(
+                    selected = selectedOrientation == orientation,
+                    onClick = {
+                        onOrientationChange(if (selectedOrientation == orientation) null else orientation)
+                    },
+                    label = { Text(orientation.toDisplayName()) },
                 )
             }
         }

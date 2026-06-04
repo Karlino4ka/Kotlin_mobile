@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.kotlin_kursach.domain.model.InstitutionOrientation
 import com.example.kotlin_kursach.domain.model.InstitutionType
 import com.example.kotlin_kursach.domain.model.toDisplayName
 
@@ -109,6 +110,24 @@ fun InstitutionFormScreen(
                         selected = form.type == type,
                         onClick = { viewModel.updateType(type) },
                         label = { Text(type.toDisplayName()) },
+                    )
+                }
+            }
+            Text("Направленность *", style = MaterialTheme.typography.labelLarge)
+            Text(
+                text = "Можно выбрать несколько",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                InstitutionOrientation.entries.forEach { orientation ->
+                    FilterChip(
+                        selected = orientation in form.orientations,
+                        onClick = { viewModel.toggleOrientation(orientation) },
+                        label = { Text(orientation.toDisplayName()) },
                     )
                 }
             }
