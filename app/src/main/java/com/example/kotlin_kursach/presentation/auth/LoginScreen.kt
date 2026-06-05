@@ -45,7 +45,7 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = "Каталог заведений",
+                text = "Каталог учебных заведений",
                 style = MaterialTheme.typography.headlineMedium,
             )
             Text(
